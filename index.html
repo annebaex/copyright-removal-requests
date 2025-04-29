@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Copyright Removal Requests</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header>
+    <h1>Removal Requests</h1>
+    <button id="new-request-btn">New removal request</button>
+  </header>
+
+  <section id="form-section" class="hidden">
+    <h2>Submit a Removal Request</h2>
+    <form id="request-form">
+      <input type="text" placeholder="Title of Original Work" name="title" required />
+      <input type="url" placeholder="Link to Infringing Content" name="link" required />
+      <select name="type" required>
+        <option value="">Type of Infringement</option>
+        <option value="video">Video</option>
+        <option value="audio">Audio</option>
+        <option value="image">Image</option>
+        <option value="text">Text</option>
+        <option value="software">Software</option>
+      </select>
+      <input type="text" placeholder="Your Name" name="name" required />
+      <input type="email" placeholder="Email Address" name="email" required />
+      <input type="text" placeholder="Ownership Details" name="ownership" required />
+      <textarea placeholder="Supporting documents (optional)" name="support"></textarea>
+      <label><input type="checkbox" required /> I confirm good faith belief.</label>
+      <label><input type="checkbox" required /> I confirm this is accurate.</label>
+      <input type="text" placeholder="Digital Signature" name="signature" required />
+      <button type="submit">Submit Request</button>
+    </form>
+  </section>
+
+  <section id="dashboard">
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Title</th>
+          <th>Request Submitted</th>
+          <th>Status</th>
+          <th>Match</th>
+          <th>Prevention</th>
+        </tr>
+      </thead>
+      <tbody id="request-list">
+        <!-- Entries added dynamically -->
+      </tbody>
+    </table>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
