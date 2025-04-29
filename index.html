@@ -2,55 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Copyright Removal Requests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Copyright Removal Portal</title>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <header>
     <h1>Removal Requests</h1>
-    <button id="new-request-btn">New removal request</button>
+    <button id="btn-open-modal">New removal request</button>
   </header>
 
-  <section id="form-section" class="hidden">
-    <h2>Submit a Removal Request</h2>
-    <form id="request-form">
-      <input type="text" placeholder="Title of Original Work" name="title" required />
-      <input type="url" placeholder="Link to Infringing Content" name="link" required />
-      <select name="type" required>
-        <option value="">Type of Infringement</option>
-        <option value="video">Video</option>
-        <option value="audio">Audio</option>
-        <option value="image">Image</option>
-        <option value="text">Text</option>
-        <option value="software">Software</option>
-      </select>
-      <input type="text" placeholder="Your Name" name="name" required />
-      <input type="email" placeholder="Email Address" name="email" required />
-      <input type="text" placeholder="Ownership Details" name="ownership" required />
-      <textarea placeholder="Supporting documents (optional)" name="support"></textarea>
-      <label><input type="checkbox" required /> I confirm good faith belief.</label>
-      <label><input type="checkbox" required /> I confirm this is accurate.</label>
-      <input type="text" placeholder="Digital Signature" name="signature" required />
-      <button type="submit">Submit Request</button>
-    </form>
-  </section>
+  <!-- MODAL -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close">&times;</button>
+      <h2>Submit a Removal Request</h2>
+      <form id="request-form">
+        <!-- Step 1: Type selector -->
+        <div class="form-step" data-step="1">
+          <label>Type of copyrighted work</label>
+          <select name="type" required>
+            <option value="">– Select type –</option>
+            <option value="Video">Video</option>
+            <option value="Audio">Audio</option>
+            <option value="Image">Image</option>
+            <option value="Text">Text</option>
+            <option value="Software">Software</option>
+          </select>
+        </div>
 
+        <!-- Step 2+: hidden until previous filled -->
+        <div class="form-step hidden" data-step="2">
+          <label>Title of the Original Work</label>
+          <input type="text" name="title" placeholder="e.g. My Cool GFX Render" required/>
+        </div>
+        <div class="form-step hidden" data-step="3">
+          <label>Link to Infringing Content</label>
+          <input type="url" name="link" placeholder="https://…" required/>
+        </div>
+        <div class="form-step hidden" data-step="4">
+          <label>Your Name</label>
+          <input type="text" name="name" required/>
+        </div>
+        <div class="form-step hidden" data-step="5">
+          <label>Your Email</label>
+          <input type="email" name="email" required/>
+        </div>
+        <div class="form-step hidden" data-step="6">
+          <label>Ownership Details</label>
+          <textarea name="ownership" required></textarea>
+        </div>
+        <div class="form-step hidden" data-step="7">
+          <label><input type="checkbox" name="goodFaith" required/>
+            I have a good faith belief that use is unauthorized.
+          </label>
+        </div>
+        <div class="form-step hidden" data-step="8">
+          <label><input type="checkbox" name="accuracy" required/>
+            Under penalty of perjury, info is accurate & I am authorized.
+          </label>
+        </div>
+        <div class="form-step hidden" data-step="9">
+          <label>Digital Signature</label>
+          <input type="text" name="signature" required/>
+        </div>
+        <div class="form-step hidden" data-step="10">
+          <label>Supporting Documents (optional)</label>
+          <input type="file" name="support"/>
+        </div>
+
+        <div class="form-step hidden" data-step="11">
+          <button type="submit" class="submit-btn">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
   <section id="dashboard">
     <table>
       <thead>
         <tr>
           <th>Type</th>
           <th>Title</th>
-          <th>Request Submitted</th>
+          <th>Submitted</th>
           <th>Status</th>
-          <th>Match</th>
-          <th>Prevention</th>
+          <th>Matches</th>
+          <th>Prevented</th>
         </tr>
       </thead>
-      <tbody id="request-list">
-        <!-- Entries added dynamically -->
-      </tbody>
+      <tbody id="request-list"></tbody>
     </table>
   </section>
 
