@@ -1,110 +1,126 @@
-// ELEMENTS
-const modal      = document.getElementById('modal');
-const btnOpen    = document.getElementById('btn-open-modal');
-const btnClose   = modal.querySelector('.close');
-const form       = document.getElementById('request-form');
-const list       = document.getElementById('request-list');
-const steps      = Array.from(form.querySelectorAll('.form-step'));
+document.addEventListener('DOMContentLoaded', ()=> {
+  const modal    = document.getElementById('modal');
+  const openBtn  = document.getElementById('openModal');
+  const closeBtn = document.getElementById('closeModal');
+  const form     = document.getElementById('requestForm');
+  const steps    = Array.from(form.querySelectorAll('.step'));
+  const list     = document.getElementById('requestList');
+  const linkIn   = form.querySelector('input[name="link"]');
+  const details  = document.getElementById('videoDetails');
 
-// OPEN & CLOSE MODAL
-btnOpen.onclick  = () => modal.classList.remove('hidden');
-btnClose.onclick = () => {
-  modal.classList.add('hidden');
-  form.reset();
-  steps.forEach((s,i) => i>0 && s.classList.add('hidden'));
-};
-
-// DYNAMIC FORM PROGRESSION
-form.addEventListener('change', e => {
-  const filledSteps = steps.filter(s => {
-    if (s.dataset.step == 1) {
-      return form.type.value !== '';
-    }
-    // check any input inside for value/checked
-    return Array.from(s.querySelectorAll('input, select, textarea'))
-      .some(el => el.value || el.checked);
-  }).length;
-
-  // reveal next step
-  if (filledSteps < steps.length) {
-    steps[filledSteps].classList.remove('hidden');
-  }
-});
-
-// SUBMIT & STORAGE
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(form).entries());
-  const now  = new Date();
-  const id   = now.getTime();
-  const record = {
-    id,
-    type: data.type,
-    title: data.title,
-    date: now.toLocaleString(),
-    status: 'Under review',
-    match: '–',
-    prevent: '–'
+  // Open/close modal
+  openBtn.onclick  = ()=> modal.classList.remove('hidden');
+  closeBtn.onclick = ()=> {
+    modal.classList.add('hidden');
+    form.reset();
+    steps.slice(1).forEach(s=>s.classList.add('hidden'));
+    details.innerHTML = '';
   };
 
-  // save & render
-  const arr = JSON.parse(localStorage.getItem('requests')||'[]');
-  arr.unshift(record);
-  localStorage.setItem('requests', JSON.stringify(arr));
-  renderTable();
-
-  // auto-status updates
-  setTimeout(() => updateStatus(id), 60_000);   // 1m → Info needed?
-  setTimeout(() => autoResolve(id), 120_000);  // 2m → Resolved
-  modal.classList.add('hidden');
-  form.reset();
-  steps.forEach((s,i) => i>0 && s.classList.add('hidden'));
-});
-
-// LOAD & RENDER
-function renderTable(){
-  list.innerHTML = '';
-  JSON.parse(localStorage.getItem('requests')||'[]').forEach(r => {
-    const tr = document.createElement('tr');
-    // dot color
-    let dot = 'gray';
-    if (r.status === 'Info needed') dot = 'orange';
-    if (r.status === 'Resolved')   dot = 'green';
-
-    tr.innerHTML = `
-      <td>${r.type}</td>
-      <td>${r.title}</td>
-      <td>${r.date}</td>
-      <td class="status-cell">
-        <span class="dot ${dot}"></span>${r.status}
-      </td>
-      <td>${r.match}</td>
-      <td>${r.prevent}</td>
-    `;
-    list.appendChild(tr);
+  // Progressive reveal
+  form.addEventListener('change', ()=> {
+    const filled = steps.filter((s,i)=>{
+      if (i===0)
+        return form.type.value!=='';
+      // any input in step has value/checked
+      return Array.from(s.querySelectorAll('input,select,textarea'))
+        .some(el=>el.value||el.checked);
+    }).length;
+    if (filled < steps.length) 
+      steps[filled].classList.remove('hidden');
   });
-}
 
-// STATUS LOGIC
-function updateStatus(id) {
-  const arr = JSON.parse(localStorage.getItem('requests'));
-  const req = arr.find(r => r.id === id);
-  if (req && !/gfx render/i.test(req.title)) {
-    req.status = 'Info needed';
+  // Video link oEmbed fetch
+  linkIn.addEventListener('blur', async ()=> {
+    details.innerHTML = '';
+    if (form.type.value !== 'Video') return;
+    const url = linkIn.value;
+    if (!url) return;
+    try {
+      const res = await fetch('https://noembed.com/embed?url='+encodeURIComponent(url));
+      const j  = await res.json();
+      if (j.error) throw j.error;
+      details.innerHTML = `
+        <img src="${j.thumbnail_url}" alt="thumb"/>
+        <div class="title">${j.title}</div>
+      `;
+    } catch(err) {
+      details.textContent = '⚠️ Could not fetch video details';
+    }
+  });
+
+  // Load & render on start
+  render();
+
+  // Submit handler
+  form.addEventListener('submit', e=> {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+    const now  = new Date();
+    const rec  = {
+      id: now.getTime(),
+      type: data.type,
+      title: data.title,
+      date: now.toLocaleString(),
+      status: 'Under review',
+      match: '–',
+      prevent: '–'
+    };
+    const arr = JSON.parse(localStorage.getItem('requests')||'[]');
+    arr.unshift(rec);
     localStorage.setItem('requests', JSON.stringify(arr));
-    renderTable();
-  }
-}
+    render();
+    modal.classList.add('hidden');
+    form.reset();
+    steps.slice(1).forEach(s=>s.classList.add('hidden'));
+    details.innerHTML = '';
 
-function autoResolve(id) {
-  const arr = JSON.parse(localStorage.getItem('requests'));
-  const req = arr.find(r => r.id === id);
-  if (req && req.status !== 'Resolved') {
-    req.status = 'Resolved';
-    localStorage.setItem('requests', JSON.stringify(arr));
-    renderTable();
-  }
-}
+    // Timers
+    setTimeout(()=> updateStatus(rec.id), 60_000);
+    setTimeout(()=> autoResolve(rec.id), 120_000);
+  });
 
-// INITIAL RENDER
-renderTable();
+  // Rendering table
+  function render(){
+    list.innerHTML = '';
+    JSON.parse(localStorage.getItem('requests')||'[]')
+      .forEach(r => {
+        const tr = document.createElement('tr');
+        let dot = 'gray';
+        if (r.status==='Info needed') dot='orange';
+        if (r.status==='Resolved')    dot='green';
+        tr.innerHTML = `
+          <td>${r.type}</td>
+          <td>${r.title}</td>
+          <td>${r.date}</td>
+          <td class="status-cell">
+            <span class="dot ${dot}"></span>${r.status}
+          </td>
+          <td>${r.match}</td>
+          <td>${r.prevent}</td>
+        `;
+        list.appendChild(tr);
+      });
+  }
+
+  // Update to Info needed if no “gfx render”
+  function updateStatus(id){
+    const arr = JSON.parse(localStorage.getItem('requests'));
+    const r   = arr.find(x=>x.id===id);
+    if (r && !/gfx render/i.test(r.title)) {
+      r.status = 'Info needed';
+      localStorage.setItem('requests', JSON.stringify(arr));
+      render();
+    }
+  }
+  // Auto-resolve
+  function autoResolve(id){
+    const arr = JSON.parse(localStorage.getItem('requests'));
+    const r   = arr.find(x=>x.id===id);
+    if (r && r.status!=='Resolved') {
+      r.status = 'Resolved';
+      localStorage.setItem('requests', JSON.stringify(arr));
+      render();
+    }
+  }
+});
