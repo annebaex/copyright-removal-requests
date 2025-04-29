@@ -1,79 +1,110 @@
-const form = document.getElementById("request-form");
-const list = document.getElementById("request-list");
-const newBtn = document.getElementById("new-request-btn");
-const formSection = document.getElementById("form-section");
+// ELEMENTS
+const modal      = document.getElementById('modal');
+const btnOpen    = document.getElementById('btn-open-modal');
+const btnClose   = modal.querySelector('.close');
+const form       = document.getElementById('request-form');
+const list       = document.getElementById('request-list');
+const steps      = Array.from(form.querySelectorAll('.form-step'));
 
-newBtn.onclick = () => formSection.classList.toggle("hidden");
+// OPEN & CLOSE MODAL
+btnOpen.onclick  = () => modal.classList.remove('hidden');
+btnClose.onclick = () => {
+  modal.classList.add('hidden');
+  form.reset();
+  steps.forEach((s,i) => i>0 && s.classList.add('hidden'));
+};
 
-form.onsubmit = (e) => {
+// DYNAMIC FORM PROGRESSION
+form.addEventListener('change', e => {
+  const filledSteps = steps.filter(s => {
+    if (s.dataset.step == 1) {
+      return form.type.value !== '';
+    }
+    // check any input inside for value/checked
+    return Array.from(s.querySelectorAll('input, select, textarea'))
+      .some(el => el.value || el.checked);
+  }).length;
+
+  // reveal next step
+  if (filledSteps < steps.length) {
+    steps[filledSteps].classList.remove('hidden');
+  }
+});
+
+// SUBMIT & STORAGE
+form.addEventListener('submit', e => {
   e.preventDefault();
-  const data = Object.fromEntries(new FormData(form));
-  const timestamp = new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
-
-  const id = Date.now();
-  const status = "Under review";
-
-  const request = {
+  const data = Object.fromEntries(new FormData(form).entries());
+  const now  = new Date();
+  const id   = now.getTime();
+  const record = {
     id,
     type: data.type,
     title: data.title,
-    date: timestamp,
-    status,
-    match: "-",
-    prevent: "-"
+    date: now.toLocaleString(),
+    status: 'Under review',
+    match: '–',
+    prevent: '–'
   };
 
-  saveRequest(request);
-  addRequestToTable(request);
+  // save & render
+  const arr = JSON.parse(localStorage.getItem('requests')||'[]');
+  arr.unshift(record);
+  localStorage.setItem('requests', JSON.stringify(arr));
+  renderTable();
+
+  // auto-status updates
+  setTimeout(() => updateStatus(id), 60_000);   // 1m → Info needed?
+  setTimeout(() => autoResolve(id), 120_000);  // 2m → Resolved
+  modal.classList.add('hidden');
   form.reset();
-  formSection.classList.add("hidden");
+  steps.forEach((s,i) => i>0 && s.classList.add('hidden'));
+});
 
-  // After 1 minute, auto-check if "gfx render" is in title
-  setTimeout(() => {
-    const saved = getRequests();
-    const req = saved.find(r => r.id === id);
-    if (!req.title.toLowerCase().includes("gfx render")) {
-      req.status = "Info needed";
-      updateRequests(saved);
-      renderRequests();
-    }
-  }, 60000);
-};
+// LOAD & RENDER
+function renderTable(){
+  list.innerHTML = '';
+  JSON.parse(localStorage.getItem('requests')||'[]').forEach(r => {
+    const tr = document.createElement('tr');
+    // dot color
+    let dot = 'gray';
+    if (r.status === 'Info needed') dot = 'orange';
+    if (r.status === 'Resolved')   dot = 'green';
 
-function saveRequest(req) {
-  const requests = getRequests();
-  requests.unshift(req);
-  updateRequests(requests);
+    tr.innerHTML = `
+      <td>${r.type}</td>
+      <td>${r.title}</td>
+      <td>${r.date}</td>
+      <td class="status-cell">
+        <span class="dot ${dot}"></span>${r.status}
+      </td>
+      <td>${r.match}</td>
+      <td>${r.prevent}</td>
+    `;
+    list.appendChild(tr);
+  });
 }
 
-function getRequests() {
-  return JSON.parse(localStorage.getItem("requests") || "[]");
+// STATUS LOGIC
+function updateStatus(id) {
+  const arr = JSON.parse(localStorage.getItem('requests'));
+  const req = arr.find(r => r.id === id);
+  if (req && !/gfx render/i.test(req.title)) {
+    req.status = 'Info needed';
+    localStorage.setItem('requests', JSON.stringify(arr));
+    renderTable();
+  }
 }
 
-function updateRequests(requests) {
-  localStorage.setItem("requests", JSON.stringify(requests));
+function autoResolve(id) {
+  const arr = JSON.parse(localStorage.getItem('requests'));
+  const req = arr.find(r => r.id === id);
+  if (req && req.status !== 'Resolved') {
+    req.status = 'Resolved';
+    localStorage.setItem('requests', JSON.stringify(arr));
+    renderTable();
+  }
 }
 
-function renderRequests() {
-  list.innerHTML = "";
-  getRequests().forEach(addRequestToTable);
-}
-
-function addRequestToTable(req) {
-  const tr = document.createElement("tr");
-
-  const dotClass = req.status === "Under review" ? "gray" :
-                   req.status === "Info needed" ? "orange" : "green";
-
-  tr.innerHTML = `
-    <td>${req.type}</td>
-    <td>${req.title}</td>
-    <td>${req.date}</td>
-    <td><div class="status"><span class="dot ${dotClass}"></span>${req.status}</div></td>
-    <td>${req.match}</td>
-    <td>${req.prevent}</td>
-  `;
-  list.appendChild(tr);
-}
-
-renderRequests();
+// INITIAL RENDER
+renderTable();
