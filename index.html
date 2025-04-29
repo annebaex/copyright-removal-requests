@@ -9,13 +9,13 @@
 <body>
   <header>
     <h1>Removal Requests</h1>
-    <button id="openModal">New removal request</button>
+    <button id="openModal" type="button">New removal request</button>
   </header>
 
   <!-- MODAL POPUP -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
-      <button id="closeModal" class="closeBtn">&times;</button>
+      <button id="closeModal" class="closeBtn" type="button">&times;</button>
       <h2>Submit a Removal Request</h2>
       <form id="requestForm">
         <!-- Step 1: Type -->
@@ -55,10 +55,16 @@
           <textarea name="ownership" required></textarea>
         </div>
         <div class="step hidden" data-step="7">
-          <label><input type="checkbox" name="goodFaith" required/> I have a good-faith belief this use is unauthorized.</label>
+          <label>
+            <input type="checkbox" name="goodFaith" required/>
+            I have a good-faith belief this use is unauthorized.
+          </label>
         </div>
         <div class="step hidden" data-step="8">
-          <label><input type="checkbox" name="accuracy" required/> Under penalty of perjury, info is accurate &amp; I’m authorized.</label>
+          <label>
+            <input type="checkbox" name="accuracy" required/>
+            Under penalty of perjury, info is accurate &amp; I’m authorized.
+          </label>
         </div>
         <div class="step hidden" data-step="9">
           <label>Digital Signature</label>
@@ -94,6 +100,7 @@
     </table>
   </section>
 
-  <script src="script.js"></script>
+  <!-- defer ensures script runs after DOM ready -->
+  <script src="script.js" defer></script>
 </body>
 </html>
