@@ -40,6 +40,7 @@
     }
     header button:hover,
     header button:focus { box-shadow: 0 0 8px var(--accent); }
+
     #dashboard { padding: 1rem 2rem; }
     table {
       width: 100%;
@@ -68,7 +69,8 @@
     .dot.gray   { background: var(--gray); }
     .dot.orange { background: var(--orange); }
     .dot.green  { background: var(--green); }
-    /* Modal */
+
+    /* Modal & Form */
     .modal {
       position: fixed; top:0; left:0;
       width:100%; height:100%;
@@ -91,15 +93,18 @@
       cursor: pointer;
     }
     form .step { margin-bottom: 1rem; }
+    form label { display: block; font-size: 0.9rem; margin-bottom: 0.25rem;}
     form input, form select, form textarea {
-      width: 100%; padding: 0.5rem; margin-top: 0.25rem;
+      width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;
       border: 1px solid #ccc; border-radius: 4px;
       transition: box-shadow 0.2s;
+      font-size: 0.9rem;
     }
     form input:focus,
     form select:focus,
     form textarea:focus {
       box-shadow: 0 0 6px var(--accent);
+      outline: none;
     }
     .submitBtn {
       background: var(--accent);
@@ -115,13 +120,13 @@
     .submitBtn:focus { box-shadow: 0 0 8px var(--accent); }
     .video-details {
       margin-top: 0.5rem;
+      font-size: 0.9rem;
     }
     .video-details img {
       max-width: 100%;
       border-radius: 4px;
     }
     .video-details .title {
-      font-size: 0.9rem;
       margin-top: 0.25rem;
     }
   </style>
@@ -129,16 +134,15 @@
 <body>
   <header>
     <h1>Removal Requests</h1>
-    <button id="openModal" type="button">New removal request</button>
+    <button id="openModal" type="button">Submit removal request</button>
   </header>
 
-  <!-- MODAL POPUP -->
+  <!-- MODAL FORM -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <button id="closeModal" class="closeBtn" type="button">&times;</button>
       <h2>Submit a Removal Request</h2>
       <form id="requestForm">
-        <!-- Step 1: Type -->
         <div class="step" data-step="1">
           <label>Type of copyrighted work</label>
           <select name="type" required>
@@ -150,18 +154,15 @@
             <option>Software</option>
           </select>
         </div>
-        <!-- Step 2: Title -->
         <div class="step hidden" data-step="2">
           <label>Title of copyrighted work</label>
-          <input type="text" name="title" placeholder="e.g. My Cool GFX Render" required/>
+          <input type="text" name="title" required placeholder="e.g. My Cool GFX Render"/>
         </div>
-        <!-- Step 3: Link -->
         <div class="step hidden" data-step="3">
           <label>Link to infringing content</label>
-          <input type="url" name="link" placeholder="https://…" required/>
+          <input type="url" name="link" required placeholder="https://…"/>
           <div id="videoDetails" class="video-details"></div>
         </div>
-        <!-- Steps 4–10: other fields -->
         <div class="step hidden" data-step="4">
           <label>Your Name</label>
           <input type="text" name="name" required/>
@@ -184,11 +185,11 @@
           <label>Digital Signature</label>
           <input type="text" name="signature" required/>
         </div>
+        <!-- optional upload shows but never blocks -->
         <div class="step hidden" data-step="10">
           <label>Supporting Documents (optional)</label>
           <input type="file" name="support"/>
         </div>
-        <!-- Final Step: Submit -->
         <div class="step hidden" data-step="11">
           <button type="submit" class="submitBtn">Submit removal request</button>
         </div>
@@ -196,7 +197,7 @@
     </div>
   </div>
 
-  <!-- DASHBOARD TABLE -->
+  <!-- DASHBOARD -->
   <section id="dashboard">
     <table>
       <thead>
@@ -215,9 +216,7 @@
   </section>
 
   <script>
-    // wrap everything so we know it runs after DOM
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('Script loaded');
+    document.addEventListener('DOMContentLoaded', ()=> {
       const modal    = document.getElementById('modal');
       const openBtn  = document.getElementById('openModal');
       const closeBtn = document.getElementById('closeModal');
@@ -227,57 +226,68 @@
       const linkIn   = form.querySelector('input[name="link"]');
       const details  = document.getElementById('videoDetails');
 
-      // Debug
-      if(!openBtn) console.error('openModal button missing');
-      if(!closeBtn) console.error('closeModal button missing');
-
-      openBtn.addEventListener('click', () => {
+      // open / close
+      openBtn.onclick  = ()=> {
         modal.classList.remove('hidden');
-        // hide subsequent steps
-        steps.slice(1).forEach(s => s.classList.add('hidden'));
+        steps.slice(1).forEach(s=>s.classList.add('hidden'));
         details.innerHTML = '';
-      });
-      closeBtn.addEventListener('click', () => {
+      };
+      closeBtn.onclick = ()=> {
         modal.classList.add('hidden');
         form.reset();
-        steps.slice(1).forEach(s => s.classList.add('hidden'));
+        steps.slice(1).forEach(s=>s.classList.add('hidden'));
         details.innerHTML = '';
-      });
+      };
 
-      // progressive reveal
-      form.addEventListener('change', () => {
-        const filled = steps.filter((s,i) => {
-          if(i===0) return form.type.value !== '';
-          return Array.from(s.querySelectorAll('input,select,textarea'))
-                     .some(el => el.value || el.checked);
-        }).length;
-        if(filled < steps.length) steps[filled].classList.remove('hidden');
-      });
+      // explicit progressive reveal
+      const titleIn     = form.querySelector('input[name="title"]');
+      const nameIn      = form.querySelector('input[name="name"]');
+      const emailIn     = form.querySelector('input[name="email"]');
+      const ownershipIn = form.querySelector('textarea[name="ownership"]');
+      const goodFaithIn = form.querySelector('input[name="goodFaith"]');
+      const accuracyIn  = form.querySelector('input[name="accuracy"]');
+      const signatureIn = form.querySelector('input[name="signature"]');
+
+      form.addEventListener('input', reveal);
+      form.addEventListener('change', reveal);
+      function reveal() {
+        if (form.elements.type.value)      steps[1].classList.remove('hidden');
+        if (titleIn.value.trim())          steps[2].classList.remove('hidden');
+        if (linkIn.value.trim()) {         
+          steps[3].classList.remove('hidden');
+        }
+        if (nameIn.value.trim())           steps[4].classList.remove('hidden');
+        if (emailIn.value.trim())          steps[5].classList.remove('hidden');
+        if (ownershipIn.value.trim())      steps[6].classList.remove('hidden');
+        if (goodFaithIn.checked)           steps[7].classList.remove('hidden');
+        if (accuracyIn.checked)            steps[8].classList.remove('hidden');
+        if (signatureIn.value.trim()) {
+          steps[9].classList.remove('hidden'); // file upload (optional)
+          steps[10].classList.remove('hidden'); // submit
+        }
+      }
 
       // video metadata fetch
       linkIn.addEventListener('blur', async () => {
         details.innerHTML = '';
-        if(form.type.value !== 'Video') return;
+        if (form.elements.type.value !== 'Video') return;
         const url = linkIn.value;
-        if(!url) return;
+        if (!url) return;
         try {
-          const resp = await fetch('https://noembed.com/embed?url=' + encodeURIComponent(url));
-          const j    = await resp.json();
-          if(j.error) throw j.error;
-          details.innerHTML = `
-            <img src="${j.thumbnail_url}" alt="thumb"/>
-            <div class="title">${j.title}</div>
-          `;
-        } catch (err) {
+          const res = await fetch('https://noembed.com/embed?url='+encodeURIComponent(url));
+          const j   = await res.json();
+          if (j.error) throw j.error;
+          details.innerHTML = `<img src="${j.thumbnail_url}"/><div class="title">${j.title}</div>`;
+        } catch {
           details.textContent = '⚠️ Could not fetch video details';
         }
       });
 
-      // render table on load
+      // render existing
       renderTable();
 
-      // form submit
-      form.addEventListener('submit', e => {
+      // handle submit
+      form.onsubmit = e => {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(form).entries());
         const now  = new Date();
@@ -291,32 +301,29 @@
           match: '–',
           prevent: '–'
         };
-        const arr = JSON.parse(localStorage.getItem('requests') || '[]');
+        const arr = JSON.parse(localStorage.getItem('requests')||'[]');
         arr.unshift(rec);
         localStorage.setItem('requests', JSON.stringify(arr));
         renderTable();
-        closeBtn.click(); // reuse close logic
-        // timers
-        setTimeout(() => updateStatus(rec.id),    60_000);
-        setTimeout(() => autoResolve(rec.id),   120_000);
-      });
+        closeBtn.click();
+        setTimeout(()=> updateStatus(rec.id),   60_000);
+        setTimeout(()=> autoResolve(rec.id),  120_000);
+      };
 
-      function renderTable() {
+      function renderTable(){
         list.innerHTML = '';
-        JSON.parse(localStorage.getItem('requests') || '[]')
+        JSON.parse(localStorage.getItem('requests')||'[]')
           .forEach(r => {
-            const tr = document.createElement('tr');
             let dot = 'gray';
-            if (r.status === 'Info needed') dot = 'orange';
-            if (r.status === 'Resolved')    dot = 'green';
+            if (r.status==='Info needed') dot='orange';
+            if (r.status==='Resolved')    dot='green';
+            const tr = document.createElement('tr');
             tr.innerHTML = `
               <td>${r.type}</td>
               <td>${r.title}</td>
               <td><a href="${r.link}" target="_blank">View</a></td>
               <td>${r.date}</td>
-              <td class="status-cell">
-                <span class="dot ${dot}"></span>${r.status}
-              </td>
+              <td class="status-cell"><span class="dot ${dot}"></span>${r.status}</td>
               <td>${r.match}</td>
               <td>${r.prevent}</td>
             `;
@@ -324,20 +331,19 @@
           });
       }
 
-      function updateStatus(id) {
+      function updateStatus(id){
         const arr = JSON.parse(localStorage.getItem('requests'));
-        const r   = arr.find(x => x.id === id);
+        const r   = arr.find(x=>x.id===id);
         if (r && !/gfx render/i.test(r.title)) {
           r.status = 'Info needed';
           localStorage.setItem('requests', JSON.stringify(arr));
           renderTable();
         }
       }
-
-      function autoResolve(id) {
+      function autoResolve(id){
         const arr = JSON.parse(localStorage.getItem('requests'));
-        const r   = arr.find(x => x.id === id);
-        if (r && r.status !== 'Resolved') {
+        const r   = arr.find(x=>x.id===id);
+        if (r && r.status!=='Resolved') {
           r.status = 'Resolved';
           localStorage.setItem('requests', JSON.stringify(arr));
           renderTable();
