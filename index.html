@@ -12,13 +12,13 @@
     <button id="openModal">New removal request</button>
   </header>
 
-  <!-- MODAL -->
+  <!-- MODAL POPUP -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <button id="closeModal" class="closeBtn">&times;</button>
       <h2>Submit a Removal Request</h2>
       <form id="requestForm">
-        <!-- Step 1 -->
+        <!-- Step 1: Type -->
         <div class="step" data-step="1">
           <label>Type of copyrighted work</label>
           <select name="type" required>
@@ -32,16 +32,16 @@
         </div>
         <!-- Step 2: Title -->
         <div class="step hidden" data-step="2">
-          <label>Title of original work</label>
-          <input type="text" name="title" required/>
+          <label>Title of copyrighted work</label>
+          <input type="text" name="title" placeholder="e.g. My Cool GFX Render" required/>
         </div>
         <!-- Step 3: Link -->
         <div class="step hidden" data-step="3">
           <label>Link to infringing content</label>
-          <input type="url" name="link" required/>
+          <input type="url" name="link" placeholder="https://…" required/>
           <div id="videoDetails" class="video-details"></div>
         </div>
-        <!-- Step 4+: rest of the fields -->
+        <!-- Step 4+: Rest of fields -->
         <div class="step hidden" data-step="4">
           <label>Your Name</label>
           <input type="text" name="name" required/>
@@ -68,21 +68,22 @@
           <label>Supporting Documents (optional)</label>
           <input type="file" name="support"/>
         </div>
-        <!-- Submit -->
+        <!-- Final Step: Submit -->
         <div class="step hidden" data-step="11">
-          <button type="submit" class="submitBtn">Submit Request</button>
+          <button type="submit" class="submitBtn">Submit removal request</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- DASHBOARD TABLE -->
   <section id="dashboard">
     <table>
       <thead>
         <tr>
           <th>Type</th>
-          <th>Title</th>
+          <th>Original Title</th>
+          <th>Infringing Link</th>
           <th>Submitted</th>
           <th>Status</th>
           <th>Matches</th>
