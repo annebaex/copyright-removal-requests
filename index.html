@@ -2,77 +2,75 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Copyright Removal Portal</title>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <header>
     <h1>Removal Requests</h1>
-    <button id="btn-open-modal">New removal request</button>
+    <button id="openModal">New removal request</button>
   </header>
 
   <!-- MODAL -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
-      <button class="close">&times;</button>
+      <button id="closeModal" class="closeBtn">&times;</button>
       <h2>Submit a Removal Request</h2>
-      <form id="request-form">
-        <!-- Step 1: Type selector -->
-        <div class="form-step" data-step="1">
+      <form id="requestForm">
+        <!-- Step 1 -->
+        <div class="step" data-step="1">
           <label>Type of copyrighted work</label>
           <select name="type" required>
             <option value="">– Select type –</option>
-            <option value="Video">Video</option>
-            <option value="Audio">Audio</option>
-            <option value="Image">Image</option>
-            <option value="Text">Text</option>
-            <option value="Software">Software</option>
+            <option>Video</option>
+            <option>Audio</option>
+            <option>Image</option>
+            <option>Text</option>
+            <option>Software</option>
           </select>
         </div>
-
-        <!-- Step 2+: hidden until previous filled -->
-        <div class="form-step hidden" data-step="2">
-          <label>Title of the Original Work</label>
-          <input type="text" name="title" placeholder="e.g. My Cool GFX Render" required/>
+        <!-- Step 2: Title -->
+        <div class="step hidden" data-step="2">
+          <label>Title of original work</label>
+          <input type="text" name="title" required/>
         </div>
-        <div class="form-step hidden" data-step="3">
-          <label>Link to Infringing Content</label>
-          <input type="url" name="link" placeholder="https://…" required/>
+        <!-- Step 3: Link -->
+        <div class="step hidden" data-step="3">
+          <label>Link to infringing content</label>
+          <input type="url" name="link" required/>
+          <div id="videoDetails" class="video-details"></div>
         </div>
-        <div class="form-step hidden" data-step="4">
+        <!-- Step 4+: rest of the fields -->
+        <div class="step hidden" data-step="4">
           <label>Your Name</label>
           <input type="text" name="name" required/>
         </div>
-        <div class="form-step hidden" data-step="5">
+        <div class="step hidden" data-step="5">
           <label>Your Email</label>
           <input type="email" name="email" required/>
         </div>
-        <div class="form-step hidden" data-step="6">
+        <div class="step hidden" data-step="6">
           <label>Ownership Details</label>
           <textarea name="ownership" required></textarea>
         </div>
-        <div class="form-step hidden" data-step="7">
-          <label><input type="checkbox" name="goodFaith" required/>
-            I have a good faith belief that use is unauthorized.
-          </label>
+        <div class="step hidden" data-step="7">
+          <label><input type="checkbox" name="goodFaith" required/> I have a good-faith belief this use is unauthorized.</label>
         </div>
-        <div class="form-step hidden" data-step="8">
-          <label><input type="checkbox" name="accuracy" required/>
-            Under penalty of perjury, info is accurate & I am authorized.
-          </label>
+        <div class="step hidden" data-step="8">
+          <label><input type="checkbox" name="accuracy" required/> Under penalty of perjury, info is accurate &amp; I’m authorized.</label>
         </div>
-        <div class="form-step hidden" data-step="9">
+        <div class="step hidden" data-step="9">
           <label>Digital Signature</label>
           <input type="text" name="signature" required/>
         </div>
-        <div class="form-step hidden" data-step="10">
+        <div class="step hidden" data-step="10">
           <label>Supporting Documents (optional)</label>
           <input type="file" name="support"/>
         </div>
-
-        <div class="form-step hidden" data-step="11">
-          <button type="submit" class="submit-btn">Submit</button>
+        <!-- Submit -->
+        <div class="step hidden" data-step="11">
+          <button type="submit" class="submitBtn">Submit Request</button>
         </div>
       </form>
     </div>
@@ -91,7 +89,7 @@
           <th>Prevented</th>
         </tr>
       </thead>
-      <tbody id="request-list"></tbody>
+      <tbody id="requestList"></tbody>
     </table>
   </section>
 
