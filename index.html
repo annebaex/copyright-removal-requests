@@ -1,248 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Copyright Removal Portal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Copyright Removal Requests</title>
   <style>
-    :root {
-      --bg: #181818; --panel: #202020; --fg: #eee;
-      --accent: #e62117; --gray: #777; --orange: #f4b400; --green: #0f9d58;
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--fg);font-family:Arial,sans-serif;}
-    header{background:var(--panel);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;}
-    header h1{font-size:1.25rem;}
-    header button{background:var(--accent);border:none;color:#fff;padding:0.4rem 0.8rem;font-size:0.9rem;border-radius:4px;cursor:pointer;transition:box-shadow 0.2s;}
-    header button:hover,header button:focus{box-shadow:0 0 8px var(--accent);}
-    #dashboard{padding:1rem 2rem;}
-    table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:6px;overflow:hidden;}
-    thead{background:#252525;}
-    th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid #333;}
-    tbody tr:hover{background:#2a2a2a;}
-    .status-cell{display:flex;align-items:center;gap:0.5rem;}
-    .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
-    .dot.gray{background:var(--gray);} .dot.orange{background:var(--orange);} .dot.green{background:var(--green);}
-    .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:100;}
-    .hidden{display:none;}
-    .modal-content{
-      background:#fff;color:#000;
-      width:90%;max-width:480px;
-      padding:1.5rem;border-radius:6px;position:relative;
-      max-height:90vh;              /* limit height */
-      overflow-y:auto;              /* enable vertical scroll */
+
+    header {
+      padding: 1rem;
+      background-color: #1e1e1e;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
     }
-    .closeBtn{position:absolute;top:0.5rem;right:0.75rem;background:none;border:none;font-size:1.5rem;cursor:pointer;}
-    form .step{margin-bottom:1rem;}
-    form label{display:block;font-size:0.9rem;margin-bottom:0.25rem;}
-    form input,form select,form textarea{
-      width:100%;padding:0.5rem;margin-bottom:0.5rem;
-      border:1px solid #ccc;border-radius:4px;
-      transition:box-shadow 0.2s;font-size:0.9rem;
+
+    .container {
+      display: flex;
+      height: 100%;
     }
-    form input:focus,form select:focus,form textarea:focus{box-shadow:0 0 6px var(--accent);outline:none;}
-    .submitBtn{
-      background:var(--accent);color:#fff;border:none;
-      padding:0.5rem 1rem;font-size:0.95rem;border-radius:4px;
-      cursor:pointer;transition:box-shadow 0.2s;
+
+    .sidebar {
+      width: 250px;
+      background-color: #1e1e1e;
+      padding: 1rem;
+      border-right: 1px solid #333;
     }
-    .submitBtn:hover,.submitBtn:focus{box-shadow:0 0 8px var(--accent);}
-    .video-details{margin-top:0.5rem;font-size:0.9rem;}
-    .video-details img{max-width:100%;border-radius:4px;}
-    .video-details .title{margin-top:0.25rem;}
+
+    .sidebar h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .sidebar button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border: none;
+      background-color: #2e2e2e;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .main {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    form {
+      background-color: #1e1e1e;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+
+    form label {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    form input,
+    form textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #444;
+      background-color: #2c2c2c;
+      color: white;
+    }
+
+    form button {
+      margin-top: 1rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th,
+    table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #444;
+      text-align: left;
+    }
+
+    .status {
+      font-weight: bold;
+      padding: 0.3rem 0.6rem;
+      border-radius: 5px;
+      display: inline-block;
+    }
+
+    .resolved {
+      color: #4caf50;
+      background-color: rgba(76, 175, 80, 0.2);
+    }
+
+    .info-needed {
+      color: #ff4d4d;
+      background-color: rgba(255, 77, 77, 0.2);
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Removal Requests</h1>
-    <button id="openModal" type="button">Submit removal request</button>
-  </header>
+  <header>Copyright Dashboard</header>
+  <div class="container">
+    <div class="sidebar">
+      <h2>Navigation</h2>
+      <button>Requests</button>
+      <button>Settings</button>
+      <button>Log Out</button>
+    </div>
+    <div class="main">
+      <form id="copyrightForm">
+        <h2>Submit Copyright Removal Request</h2>
+        <label for="copyrightedWork">Title of Copyrighted Work</label>
+        <input type="text" id="copyrightedWork" required />
 
-  <div id="modal" class="modal hidden">
-    <div class="modal-content">
-      <button id="closeModal" class="closeBtn" type="button">&times;</button>
-      <h2>Submit a Removal Request</h2>
-      <form id="requestForm">
-        <div class="step" data-step="1">
-          <label>Type of copyrighted work</label>
-          <select name="type" required>
-            <option value="">– Select type –</option>
-            <option>Video</option><option>Audio</option><option>Image</option>
-            <option>Text</option><option>Software</option>
-          </select>
-        </div>
-        <div class="step hidden" data-step="2">
-          <label>Title of copyrighted work</label>
-          <input type="text" name="title" required placeholder="e.g. My Cool GFX Render"/>
-        </div>
-        <div class="step hidden" data-step="3">
-          <label>Link to infringing content</label>
-          <input type="url" name="link" required placeholder="https://…"/>
-          <div id="videoDetails" class="video-details"></div>
-        </div>
-        <div class="step hidden" data-step="4">
-          <label>Your Name</label><input type="text" name="name" required/>
-        </div>
-        <div class="step hidden" data-step="5">
-          <label>Your Email</label><input type="email" name="email" required/>
-        </div>
-        <div class="step hidden" data-step="6">
-          <label>Ownership Details</label><textarea name="ownership" required></textarea>
-        </div>
-        <div class="step hidden" data-step="7">
-          <label><input type="checkbox" name="goodFaith" required/> I have a good-faith belief this use is unauthorized.</label>
-        </div>
-        <div class="step hidden" data-step="8">
-          <label><input type="checkbox" name="accuracy" required/> Under penalty of perjury, info is accurate &amp; I’m authorized.</label>
-        </div>
-        <div class="step hidden" data-step="9">
-          <label>Digital Signature</label><input type="text" name="signature" required/>
-        </div>
-        <div class="step hidden" data-step="10">
-          <label>Supporting Documents (optional)</label><input type="file" name="support"/>
-        </div>
-        <div class="step hidden" data-step="11">
-          <button type="submit" class="submitBtn">Submit removal request</button>
-        </div>
+        <label for="infringingLink">Infringing Link</label>
+        <input type="text" id="infringingLink" required />
+
+        <label for="description">Description</label>
+        <textarea id="description" rows="3"></textarea>
+
+        <label for="signature">Digital Signature</label>
+        <input type="text" id="signature" required />
+
+        <button type="submit">Submit Request</button>
       </form>
+
+      <table id="requestTable">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Infringing Link</th>
+            <th>Channel</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Requests will appear here -->
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <section id="dashboard">
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th><th>Original Title</th><th>Infringing Link</th>
-          <th>Submitted</th><th>Status</th><th>Matches</th><th>Prevented</th>
-        </tr>
-      </thead>
-      <tbody id="requestList"></tbody>
-    </table>
-  </section>
-
   <script>
-    document.addEventListener('DOMContentLoaded', ()=> {
-      const modal    = document.getElementById('modal');
-      const openBtn  = document.getElementById('openModal');
-      const closeBtn = document.getElementById('closeModal');
-      const form     = document.getElementById('requestForm');
-      const steps    = Array.from(form.querySelectorAll('.step'));
-      const list     = document.getElementById('requestList');
-      const linkIn   = form.querySelector('input[name="link"]');
-      const details  = document.getElementById('videoDetails');
+    const form = document.getElementById('copyrightForm');
+    const tableBody = document.querySelector('#requestTable tbody');
 
-      openBtn.onclick  = ()=> {
-        modal.classList.remove('hidden');
-        steps.slice(1).forEach(s=>s.classList.add('hidden'));
-        details.innerHTML = '';
-      };
-      closeBtn.onclick = ()=> {
-        modal.classList.add('hidden');
-        form.reset();
-        steps.slice(1).forEach(s=>s.classList.add('hidden'));
-        details.innerHTML = '';
-      };
-
-      // generic step-by-step reveal + auto-scroll
-      form.addEventListener('input', reveal);
-      form.addEventListener('change', reveal);
-      function reveal() {
-        steps.forEach((step, i) => {
-          const requiredEls = Array.from(step.querySelectorAll('input,select,textarea'))
-            .filter(el=>el.name!=='support');
-          const allFilled = requiredEls.every(el =>
-            el.type==='checkbox' ? el.checked : el.value.trim()!==''
-          );
-          if (allFilled && i+1<steps.length) {
-            const next = steps[i+1];
-            if (next.classList.contains('hidden')) {
-              next.classList.remove('hidden');
-              // scroll the newly revealed step into view
-              next.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          }
-        });
+    function extractChannelName(url) {
+      try {
+        const parsed = new URL(url);
+        const parts = parsed.pathname.split('/');
+        const channelPart = parts.find(part => part && (part.includes('@') || part.startsWith('channel')));
+        return channelPart || "Unknown";
+      } catch (e) {
+        return "Unknown";
       }
+    }
 
-      // video metadata fetch
-      linkIn.addEventListener('blur', async () => {
-        details.innerHTML = '';
-        if (form.elements.type.value!=='Video') return;
-        const url = linkIn.value.trim();
-        if (!url) return;
-        try {
-          const res = await fetch('https://noembed.com/embed?url='+encodeURIComponent(url));
-          const j   = await res.json();
-          if (j.error) throw j.error;
-          details.innerHTML = `
-            <img src="${j.thumbnail_url}" alt="thumb"/>
-            <div class="title">${j.title}</div>
-          `;
-        } catch {
-          details.textContent = '⚠️ Could not fetch video details';
-        }
-      });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const title = document.getElementById('copyrightedWork').value.trim();
+      const link = document.getElementById('infringingLink').value.trim();
+      const signature = document.getElementById('signature').value.trim();
+      const channel = extractChannelName(link);
 
-      // render on load
-      renderTable();
+      const includesGfx = title.toLowerCase().includes('gfx render');
+      const statusText = includesGfx ? 'Request Resolved' : 'Info Needed';
+      const statusClass = includesGfx ? 'resolved' : 'info-needed';
 
-      // handle submit
-      form.onsubmit = e => {
-        e.preventDefault();
-        const data = Object.fromEntries(new FormData(form).entries());
-        const now  = new Date();
-        const rec  = {
-          id: now.getTime(),
-          type: data.type, title: data.title, link: data.link,
-          date: now.toLocaleString(), status: 'Under review',
-          match: '–', prevent: '–'
-        };
-        const arr = JSON.parse(localStorage.getItem('requests')||'[]');
-        arr.unshift(rec);
-        localStorage.setItem('requests',JSON.stringify(arr));
-        renderTable();
-        closeBtn.click();
-        setTimeout(()=> updateStatus(rec.id),   60_000);
-        setTimeout(()=> autoResolve(rec.id),  120_000);
-      };
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${title}</td>
+        <td><a href="${link}" target="_blank">${link}</a></td>
+        <td>${channel}</td>
+        <td><span class="status ${statusClass}">${statusText}</span></td>
+      `;
 
-      function renderTable(){
-        list.innerHTML = '';
-        JSON.parse(localStorage.getItem('requests')||'[]')
-          .forEach(r => {
-            let dot='gray';
-            if(r.status==='Info needed') dot='orange';
-            if(r.status==='Resolved')    dot='green';
-            const tr=document.createElement('tr');
-            tr.innerHTML=`
-              <td>${r.type}</td><td>${r.title}</td>
-              <td><a href="${r.link}" target="_blank">View</a></td>
-              <td>${r.date}</td>
-              <td class="status-cell"><span class="dot ${dot}"></span>${r.status}</td>
-              <td>${r.match}</td><td>${r.prevent}</td>
-            `;
-            list.appendChild(tr);
-          });
-      }
-
-      function updateStatus(id){
-        const arr=JSON.parse(localStorage.getItem('requests'));
-        const r=arr.find(x=>x.id===id);
-        if(r && !/gfx render/i.test(r.title)){
-          r.status='Info needed';
-          localStorage.setItem('requests',JSON.stringify(arr));
-          renderTable();
-        }
-      }
-      function autoResolve(id){
-        const arr=JSON.parse(localStorage.getItem('requests'));
-        const r=arr.find(x=>x.id===id);
-        if(r && r.status!=='Resolved'){
-          r.status='Resolved';
-          localStorage.setItem('requests',JSON.stringify(arr));
-          renderTable();
-        }
-      }
+      tableBody.appendChild(row);
+      form.reset();
     });
   </script>
 </body>
