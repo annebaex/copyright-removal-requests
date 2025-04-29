@@ -9,7 +9,6 @@
 }
 
 * { box-sizing: border-box; margin:0; padding:0; }
-
 body {
   background: var(--bg);
   color: var(--fg);
@@ -34,8 +33,8 @@ header button {
   cursor: pointer;
   transition: box-shadow 0.2s;
 }
-header button:focus,
-header button:hover { box-shadow: 0 0 8px var(--accent); }
+header button:hover,
+header button:focus { box-shadow: 0 0 8px var(--accent); }
 
 #dashboard { padding: 1rem 2rem; }
 table {
@@ -52,6 +51,7 @@ th, td {
   border-bottom: 1px solid #333;
 }
 tbody tr:hover { background: #2a2a2a; }
+
 .status-cell {
   display: flex;
   align-items: center;
@@ -111,8 +111,8 @@ form textarea:focus {
   cursor: pointer;
   transition: box-shadow 0.2s;
 }
-.submitBtn:focus,
-.submitBtn:hover { box-shadow: 0 0 8px var(--accent); }
+.submitBtn:hover,
+.submitBtn:focus { box-shadow: 0 0 8px var(--accent); }
 
 .video-details {
   margin-top: 0.5rem;
